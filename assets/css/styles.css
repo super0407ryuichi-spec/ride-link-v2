@@ -12,3 +12,13 @@ main{padding:16px 15px 28px}.card{overflow:hidden;border:1px solid var(--line);b
 
 /* Phase 4: JMA rain timeline */
 .clock{flex-wrap:wrap}.clock em{margin-left:auto;color:var(--green);font-size:10px;font-style:normal;font-weight:700}.timeline-row{align-items:stretch}.timeline{height:76px}.play-button{height:76px;flex-basis:64px}.time-item{height:76px;padding:10px 3px 7px;border:0;background:transparent;font-family:inherit;appearance:none;-webkit-appearance:none}.time-item small,.time-item strong{display:block;white-space:nowrap}.time-item small{margin-bottom:5px;font-size:9px;font-weight:700}.time-item strong{font-size:12px}.time-item.observed small{color:var(--green)}.time-item.forecast small{color:var(--blue)}.time-item.analysis small{color:var(--orange)}.time-item.active{background:#fff;border-radius:10px;box-shadow:inset 0 0 0 2px currentColor}.time-item.active:after{height:16px}.time-item.current:not(.active){background:rgba(238,123,50,.08);border-radius:10px}.rain-key{display:flex;justify-content:flex-end;gap:7px;margin-top:9px}.rain-key span{padding:3px 7px;border-radius:99px;font-size:8px;font-weight:800}.observed-key{color:var(--green);background:#e5eee9}.analysis-key{color:#a34812;background:#fff0e5}.forecast-key{color:var(--blue);background:#e8f0ff}.weather-attribution{margin:9px 0 0;color:var(--muted);font-size:9px;line-height:1.4;text-align:right}.weather-attribution a{color:var(--green);font-weight:700}.leaflet-rain-pane{pointer-events:none}.leaflet-rain-pane .leaflet-tile{transition:opacity .12s linear}.play-button:disabled{opacity:.45;box-shadow:none}
+
+
+/* Phase 4: map analysis time and north-up / heading-up */
+.map-analysis-time{position:absolute;z-index:1001;left:12px;top:112px;min-height:34px;padding:7px 10px;display:flex;align-items:baseline;gap:6px;border:1px solid rgba(255,255,255,.72);border-radius:10px;color:#fff;background:rgba(22,76,59,.82);box-shadow:0 3px 10px rgba(25,42,34,.18);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);font-size:10px;font-weight:700;line-height:1;pointer-events:none}
+.map-analysis-time strong{font-size:16px;letter-spacing:.02em}
+.clock{min-height:16px;margin-bottom:10px}
+.clock em{margin-left:0}
+#heading-button{transition:color .15s ease,background-color .15s ease}
+#heading-button.is-heading-up .compass-icon{border-color:#fff;font:800 18px/1 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+#heading-button.is-heading-up small{font-size:8px}
