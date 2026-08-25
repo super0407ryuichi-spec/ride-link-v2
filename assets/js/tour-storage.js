@@ -84,10 +84,22 @@
 
   const getById = (id) => list().find((tour) => tour.id === id) || null;
 
+  const remove = (id) => {
+    const store = readStore();
+    const nextTours = store.tours.filter((tour) => tour.id !== id);
+    const removed = nextTours.length !== store.tours.length;
+    if (removed) {
+      store.tours = nextTours;
+      writeStore(store);
+    }
+    return removed;
+  };
+
   window.RideLinkTourStorage = Object.freeze({
     key: STORAGE_KEY,
     list,
     save,
-    getById
+    getById,
+    remove
   });
 })();
