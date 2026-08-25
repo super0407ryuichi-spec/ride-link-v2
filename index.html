@@ -7,7 +7,7 @@
   <meta name="description" content="自由に走ろう、つながる道。Ride Link">
   <title>Ride Link</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-  <link rel="stylesheet" href="assets/css/styles.css?v=phase3-heading-v2">
+  <link rel="stylesheet" href="assets/css/styles.css?v=phase4-rain">
 </head>
 <body>
 <div class="app">
@@ -19,7 +19,7 @@
   <main>
     <section class="radar card" aria-labelledby="map-title">
       <div class="card-head">
-        <h1 id="map-title">現在地マップ <small>（OpenStreetMap）</small></h1>
+        <h1 id="map-title">雨雲レーダー <small>（過去60分〜未来60分）</small></h1>
         <span class="map-live"><i></i> MAP</span>
       </div>
       <div class="map" aria-label="現在地を表示する地図">
@@ -34,11 +34,13 @@
         <p><small>現在地・進行方向</small><strong id="location-status" role="status" aria-live="polite">位置情報を確認しています…</strong><span id="heading-status" class="heading-status" role="status" aria-live="polite">進行方向ボタンで方位を表示できます</span></p>
       </div>
       <div class="timeline-box">
-        <div class="clock"><span>現在時刻</span><strong id="current-time">--:--</strong></div>
+        <div class="clock"><span>最新解析</span><strong id="analysis-time">--:--</strong><em id="rain-status" role="status" aria-live="polite">雨雲を確認しています…</em></div>
         <div class="timeline-row">
           <button id="play-button" class="play-button" type="button" aria-label="タイムラインを再生" aria-pressed="false"><span></span></button>
-          <div id="timeline" class="timeline" aria-label="過去60分から未来60分までのタイムライン" tabindex="0"></div>
+          <div id="timeline" class="timeline" aria-label="過去60分から未来60分までの雨雲タイムライン" tabindex="0"></div>
         </div>
+        <div class="rain-key" aria-label="タイムラインの区分"><span class="observed-key">観測</span><span class="analysis-key">最新解析</span><span class="forecast-key">予測</span></div>
+        <p class="weather-attribution">雨雲データ：<a href="https://www.jma.go.jp/bosai/rain/" target="_blank" rel="noopener">気象庁「雨雲の動き」</a>をもとに表示</p>
       </div>
     </section>
     <section class="home-actions" aria-label="ツーリングメニュー">
@@ -53,6 +55,7 @@
   </nav>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="assets/js/app.js?v=phase3-heading" defer></script>
+<script src="assets/js/jma-rain-provider.js?v=phase4-rain" defer></script>
+<script src="assets/js/app.js?v=phase4-rain" defer></script>
 </body>
 </html>
