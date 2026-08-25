@@ -194,6 +194,15 @@
   };
 
   const returnToEdit = () => {
+    const draft = getDraft();
+    if (draft) {
+      window.dispatchEvent(new CustomEvent('ride-link:edit-tour', {
+        detail: {
+          ...draft,
+          waypoints: Array.isArray(draft.waypoints) ? [...draft.waypoints] : []
+        }
+      }));
+    }
     window.location.hash = '#create';
   };
 
