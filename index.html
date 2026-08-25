@@ -7,7 +7,7 @@
   <meta name="description" content="自由に走ろう、つながる道。Ride Link">
   <title>Ride Link</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-  <link rel="stylesheet" href="assets/css/styles.css?v=phase5-tour-form">
+  <link rel="stylesheet" href="assets/css/styles.css?v=phase6-tour-confirm">
 </head>
 <body>
 <div class="app">
@@ -149,6 +149,71 @@
       AI相談機能は今後実装します
     </div>
   </section>
+  <section id="confirm-view" class="confirm-view" aria-labelledby="confirm-title" hidden>
+    <header class="confirm-header">
+      <button id="confirm-back-button" class="confirm-back-button" type="button" aria-label="入力画面へ戻る">‹</button>
+      <a class="confirm-logo" href="#" aria-label="Ride Link ホーム">
+        <b>Ride Link</b>
+        <small>自由に走ろう、つながる道。</small>
+      </a>
+      <button id="confirm-edit-button" class="confirm-edit-button" type="button">編集する</button>
+    </header>
+
+    <main class="confirm-main">
+      <div class="confirm-page-title">
+        <span>ROUTE REVIEW</span>
+        <h1 id="confirm-title">ツーリングの確認</h1>
+        <p>地点の順番を確認して、共有または保存できます</p>
+      </div>
+
+      <section id="confirm-empty-state" class="confirm-empty-state" hidden>
+        <strong>確認するルートがありません</strong>
+        <p>ツーリング作成画面で地点を入力してください。</p>
+        <button type="button">入力画面へ戻る</button>
+      </section>
+
+      <div id="confirm-content" hidden>
+        <section class="confirm-name-card">
+          <small>ツーリング名</small>
+          <h2 id="confirm-tour-title">名称未設定</h2>
+        </section>
+
+        <section class="confirm-route-card" aria-labelledby="confirm-route-heading">
+          <div class="confirm-section-head">
+            <span class="confirm-route-icon" aria-hidden="true"></span>
+            <div>
+              <small>ROUTE</small>
+              <h2 id="confirm-route-heading">ルートの順番</h2>
+            </div>
+          </div>
+          <ol id="confirm-route-list" class="confirm-route-list"></ol>
+          <p id="confirm-return-note" class="confirm-return-note"></p>
+        </section>
+
+        <p id="maps-limit-note" class="maps-limit-note" role="status" hidden></p>
+
+        <div class="confirm-actions">
+          <a id="open-google-maps" class="confirm-action google-maps-action" href="#" target="_blank" rel="noopener">
+            <span class="maps-action-icon" aria-hidden="true">G</span>
+            <strong>Googleマップで開く</strong>
+            <b aria-hidden="true">›</b>
+          </a>
+          <button id="copy-share-link" class="confirm-action copy-action" type="button">
+            <span class="copy-action-icon" aria-hidden="true">↗</span>
+            <strong>共有リンクをコピー</strong>
+          </button>
+          <button id="save-tour-button" class="confirm-action save-action" type="button">
+            <span class="save-action-icon" aria-hidden="true">▤</span>
+            <strong>このツーリングを保存</strong>
+          </button>
+        </div>
+
+        <p class="share-help">コピーしたURLはLINEなどへ貼り付けて共有できます</p>
+        <div id="confirm-action-status" class="confirm-action-status" role="status" aria-live="polite" hidden></div>
+      </div>
+    </main>
+  </section>
+
   <nav class="bottom-nav" aria-label="メインナビゲーション">
     <a id="home-nav-link" class="active" href="#" data-view-link="home" aria-current="page"><span class="home-icon"></span><small>ホーム</small></a>
     <a id="create-nav-link" href="#create" data-view-link="create"><span class="nav-route"></span><small>ツーリング作成</small></a>
@@ -159,6 +224,9 @@
 <script src="https://unpkg.com/@tomickigrzegorz/leaflet-rotate@0.2.3/dist/leaflet-rotate.umd.min.js"></script>
 <script src="assets/js/jma-rain-provider.js?v=phase4-heading-up" defer></script>
 <script src="assets/js/app.js?v=phase4-heading-up" defer></script>
-<script src="assets/js/tour-form.js?v=phase5-tour-form" defer></script>
+<script src="assets/js/tour-storage.js?v=phase6-tour-confirm" defer></script>
+<script src="assets/js/tour-links.js?v=phase6-tour-confirm" defer></script>
+<script src="assets/js/tour-form.js?v=phase6-tour-confirm" defer></script>
+<script src="assets/js/tour-confirm.js?v=phase6-tour-confirm" defer></script>
 </body>
 </html>
