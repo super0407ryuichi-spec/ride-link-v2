@@ -2,6 +2,8 @@
   const mapElement = document.querySelector('#leaflet-map');
   const locationStatus = document.querySelector('#location-status');
   const locateButton = document.querySelector('#locate-button');
+  const headingButton = document.querySelector('#heading-button');
+  const headingStatus = document.querySelector('#heading-status');
 
   if (mapElement && locationStatus && locateButton) {
     if (typeof window.L === 'undefined') {
@@ -23,12 +25,20 @@
 
       const markerIcon = L.divIcon({
         className: 'ride-location-marker',
-        html: '<span><i></i></span>',
+        html: '<b class="marker-heading-arrow"></b><span><i></i></span>',
         iconSize: [34, 34],
         iconAnchor: [17, 17]
       });
       let currentMarker = null;
       let accuracyCircle = null;
+      let latestHeading = null;
+
+      const applyHeading = () => {
+        const markerElement = currentMarker?.getElement();
+        if (!markerElement || latestHeading === null) return;
+        markerElement.style.setProperty('--heading', `${latestHeading}deg`);
+        markerElement.classList.add('has-heading');
+      };
 
       const showPosition = ({ coords }) => {
         const position = [coords.latitude, coords.longitude];
@@ -51,6 +61,7 @@
           interactive: false
         }).addTo(map);
         map.setView(position, 16, { animate: true });
+        applyHeading();
         locationStatus.textContent = `現在地を表示中（精度 約${Math.round(coords.accuracy)}m）`;
         locateButton.classList.remove('is-loading');
       };
@@ -86,6 +97,72 @@
       L.DomEvent.disableClickPropagation(locateButton.parentElement);
       requestAnimationFrame(() => map.invalidateSize());
       requestLocation();
+
+      if (headingButton && headingStatus) {
+        let orientationListening = false;
+        let orientationReceived = false;
+        let orientationTimeout = null;
+
+        const screenAngle = () => {
+          const angle = window.screen?.orientation?.angle;
+          if (Number.isFinite(angle)) return angle;
+          return Number.isFinite(window.orientation) ? Number(window.orientation) : 0;
+        };
+
+        const handleOrientation = (event) => {
+          let heading = null;
+          if (Number.isFinite(event.webkitCompassHeading)) {
+            heading = event.webkitCompassHeading;
+          } else if (Number.isFinite(event.alpha)) {
+            heading = 360 - event.alpha + screenAngle();
+          }
+          if (heading === null) return;
+          latestHeading = (heading + 360) % 360;
+          orientationReceived = true;
+          window.clearTimeout(orientationTimeout);
+          applyHeading();
+          headingButton.classList.add('is-active');
+          headingStatus.textContent = `進行方向を表示中（${Math.round(latestHeading)}°）`;
+        };
+
+        const startOrientation = () => {
+          if (!orientationListening) {
+            window.addEventListener('deviceorientation', handleOrientation, true);
+            orientationListening = true;
+          }
+          orientationReceived = false;
+          headingStatus.textContent = '進行方向を取得しています…';
+          window.clearTimeout(orientationTimeout);
+          orientationTimeout = window.setTimeout(() => {
+            if (!orientationReceived) {
+              headingStatus.textContent = '方位を取得できません。端末のセンサー設定を確認してください';
+            }
+          }, 5000);
+        };
+
+        headingButton.addEventListener('click', async () => {
+          if (!window.isSecureContext) {
+            headingStatus.textContent = '進行方向の利用にはHTTPS接続が必要です';
+            return;
+          }
+          if (typeof window.DeviceOrientationEvent === 'undefined') {
+            headingStatus.textContent = 'この端末では進行方向を取得できません';
+            return;
+          }
+          try {
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+              const permission = await DeviceOrientationEvent.requestPermission();
+              if (permission !== 'granted') {
+                headingStatus.textContent = 'センサーを許可すると進行方向を表示できます';
+                return;
+              }
+            }
+            startOrientation();
+          } catch {
+            headingStatus.textContent = 'センサーを許可すると進行方向を表示できます';
+          }
+        });
+      }
     }
   }
 
