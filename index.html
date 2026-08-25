@@ -6,18 +6,38 @@
   <meta name="theme-color" content="#fff">
   <meta name="description" content="自由に走ろう、つながる道。Ride Link">
   <title>Ride Link</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lobster&display=swap">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-  <link rel="stylesheet" href="assets/css/styles.css?v=phase9-header-minimal">
+  <link rel="stylesheet" href="assets/css/styles.css?v=phase10-outdoor-home">
 </head>
 <body>
 <div class="app">
   <div id="home-view" class="view">
-  <header class="header">
-    <span class="header-btn header-placeholder" aria-hidden="true"></span>
-    <a class="logo" href="#"><span class="mountain">⌁</span><b>Ride Link</b><small>自由に走ろう、つながる道。</small></a>
-    <button class="header-btn profile" type="button" aria-label="バイク"><span class="profile-bike" aria-hidden="true">🏍️</span></button>
-  </header>
-  <main>
+    <section class="home-hero" aria-label="Ride Link ツーリングホーム">
+      <header class="header">
+        <span class="header-btn header-placeholder" aria-hidden="true"></span>
+        <a class="logo" href="#" aria-label="Ride Link ホーム">
+          <span class="mountain-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+          <b>Ride Link</b>
+          <small>走る、つながる、特別になる。</small>
+        </a>
+        <button class="header-btn profile" type="button" aria-label="バイク"><span class="profile-bike" aria-hidden="true">🏍️</span></button>
+      </header>
+
+      <section class="home-actions" aria-label="ツーリングメニュー">
+        <a class="primary-cta" href="#create"><span class="cta-plus">＋</span><span><strong>ツーリングを作成</strong><small>新しいルートを計画する</small></span><b>›</b></a>
+        <a class="saved-cta" id="saved" href="#saved-list"><span class="saved-icon">▤</span><span><strong>保存したツーリング</strong><small>作成済みのプランを確認</small></span><b>›</b></a>
+      </section>
+      <a class="hero-weather-link" href="#ride-weather">雨雲レーダーを見る <span aria-hidden="true">↓</span></a>
+    </section>
+
+    <main id="ride-weather" class="home-main">
+      <div class="home-section-title">
+        <small>RIDE WEATHER</small>
+        <h1>走り出す前に、空を確認。</h1>
+      </div>
     <section class="radar card" aria-labelledby="map-title">
       <div class="card-head">
         <h1 id="map-title">雨雲レーダー <small>（過去60分〜未来60分）</small></h1>
@@ -45,11 +65,7 @@
         <p class="weather-attribution">雨雲データ：<a href="https://www.jma.go.jp/bosai/rain/" target="_blank" rel="noopener">気象庁「雨雲の動き」</a>をもとに表示</p>
       </div>
     </section>
-    <section class="home-actions" aria-label="ツーリングメニュー">
-      <a class="primary-cta" href="#create"><span class="cta-plus">＋</span><span><strong>ツーリングを作成</strong><small>ルートと予定をまとめる</small></span><b>›</b></a>
-      <a class="saved-cta" id="saved" href="#saved-list"><span class="saved-icon">▤</span><span><strong>保存したツーリング</strong><small>作成済みのプランを確認</small></span><b>›</b></a>
-    </section>
-  </main>
+    </main>
   </div>
 
   <section id="create-view" class="create-view" aria-labelledby="create-title" hidden>
