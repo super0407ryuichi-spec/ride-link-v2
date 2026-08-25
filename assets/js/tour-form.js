@@ -3,10 +3,10 @@
   const createView = document.querySelector('#create-view');
   const confirmView = document.querySelector('#confirm-view');
   const savedView = document.querySelector('#saved-view');
+  const aiConsultView = document.querySelector('#ai-consult-view');
   const backButton = document.querySelector('#create-back-button');
   const manualCard = document.querySelector('#manual-route-card');
   const aiCard = document.querySelector('#ai-route-card');
-  const aiNotice = document.querySelector('#ai-notice');
   const form = document.querySelector('#tour-form');
   const titleInput = document.querySelector('#tour-title');
   const originInput = document.querySelector('#tour-origin');
@@ -22,11 +22,11 @@
   if (!homeView || !createView || !form || !originInput || !destinationInput || !waypointList) return;
 
   let nextWaypointId = 1;
-  let aiNoticeTimer = null;
   let savedReturnPoint = '';
 
   const currentView = () => {
     if (window.location.hash === '#create') return 'create';
+    if (window.location.hash === '#ai-consult') return 'ai';
     if (window.location.hash === '#confirm') return 'confirm';
     if (window.location.hash === '#saved' || window.location.hash === '#saved-list') return 'saved';
     return 'home';
@@ -34,7 +34,7 @@
 
   const updateNavigation = () => {
     const hash = window.location.hash;
-    const activeView = hash === '#create' || hash === '#confirm'
+    const activeView = hash === '#create' || hash === '#ai-consult' || hash === '#confirm'
       ? 'create'
       : hash === '#saved' || hash === '#saved-list'
         ? 'saved'
@@ -52,11 +52,13 @@
     const view = currentView();
     const showHome = view === 'home';
     const showCreate = view === 'create';
+    const showAi = view === 'ai';
     const showConfirm = view === 'confirm';
     const showSaved = view === 'saved';
 
     homeView.hidden = !showHome;
     createView.hidden = !showCreate;
+    if (aiConsultView) aiConsultView.hidden = !showAi;
     if (confirmView) confirmView.hidden = !showConfirm;
     if (savedView) savedView.hidden = !showSaved;
     document.body.classList.toggle('create-screen-open', !showHome);
@@ -138,16 +140,6 @@
     }
     updateWaypointOrder();
     row.querySelector(`[data-action="${direction}"]`).focus();
-  };
-
-  const showAiNotice = () => {
-    window.clearTimeout(aiNoticeTimer);
-    aiNotice.hidden = false;
-    aiCard.classList.add('notice-active');
-    aiNoticeTimer = window.setTimeout(() => {
-      aiNotice.hidden = true;
-      aiCard.classList.remove('notice-active');
-    }, 3000);
   };
 
   const setFieldError = (input, errorElement, hasError) => {
@@ -234,6 +226,18 @@
     loadDraft(event.detail);
   });
 
+  window.addEventListener('ride-link:ai-route-import', (event) => {
+    const { route, found, missingOptional } = event.detail;
+    loadDraft(route);
+    const foundText = found.length ? `取得：${found.join('、')}` : '';
+    const missingText = missingOptional.length ? `未取得：${missingOptional.join('、')}` : '';
+    successMessage.textContent = ['AI回答をルートへ反映しました', foundText, missingText]
+      .filter(Boolean)
+      .join('／');
+    successMessage.hidden = false;
+    successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+
   backButton.addEventListener('click', () => {
     window.location.hash = '';
   });
@@ -244,7 +248,9 @@
     originInput.focus();
   });
 
-  aiCard.addEventListener('click', showAiNotice);
+  aiCard.addEventListener('click', () => {
+    window.location.hash = '#ai-consult';
+  });
 
   addWaypointButton.addEventListener('click', () => createWaypoint());
 
