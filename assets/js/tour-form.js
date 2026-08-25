@@ -2,6 +2,7 @@
   const homeView = document.querySelector('#home-view');
   const createView = document.querySelector('#create-view');
   const confirmView = document.querySelector('#confirm-view');
+  const savedView = document.querySelector('#saved-view');
   const backButton = document.querySelector('#create-back-button');
   const manualCard = document.querySelector('#manual-route-card');
   const aiCard = document.querySelector('#ai-route-card');
@@ -27,6 +28,7 @@
   const currentView = () => {
     if (window.location.hash === '#create') return 'create';
     if (window.location.hash === '#confirm') return 'confirm';
+    if (window.location.hash === '#saved' || window.location.hash === '#saved-list') return 'saved';
     return 'home';
   };
 
@@ -51,10 +53,12 @@
     const showHome = view === 'home';
     const showCreate = view === 'create';
     const showConfirm = view === 'confirm';
+    const showSaved = view === 'saved';
 
     homeView.hidden = !showHome;
     createView.hidden = !showCreate;
     if (confirmView) confirmView.hidden = !showConfirm;
+    if (savedView) savedView.hidden = !showSaved;
     document.body.classList.toggle('create-screen-open', !showHome);
     updateNavigation();
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -99,7 +103,7 @@
     });
   };
 
-  const createWaypoint = () => {
+  const createWaypoint = (value = '', { focus = true } = {}) => {
     const waypointId = nextWaypointId++;
     const row = document.createElement('div');
     row.className = 'waypoint-card';
@@ -120,8 +124,10 @@
       <input id="waypoint-${waypointId}" name="waypoint" type="text" placeholder="例：道の駅 川場田園プラザ" autocomplete="off">
     `;
     waypointList.append(row);
+    const input = row.querySelector('input');
+    input.value = value;
     updateWaypointOrder();
-    row.querySelector('input').focus();
+    if (focus) input.focus();
   };
 
   const moveWaypoint = (row, direction) => {
@@ -194,6 +200,40 @@
     return buildRouteData();
   };
 
+  const loadDraft = (draft) => {
+    if (!draft) return;
+
+    titleInput.value = String(draft.title || '');
+    originInput.value = String(draft.origin || '');
+    destinationInput.value = String(draft.destination || '');
+    waypointList.replaceChildren();
+    (Array.isArray(draft.waypoints) ? draft.waypoints : []).forEach((waypoint) => {
+      createWaypoint(String(waypoint), { focus: false });
+    });
+    updateWaypointOrder();
+
+    const returnPoint = String(draft.returnPoint || '');
+    const sameAsOrigin = Boolean(returnPoint) && returnPoint === originInput.value.trim();
+    savedReturnPoint = sameAsOrigin ? '' : returnPoint;
+    returnSameOrigin.checked = sameAsOrigin;
+    returnInput.value = returnPoint;
+    syncReturnPoint();
+
+    setFieldError(originInput, document.querySelector('#origin-error'), false);
+    setFieldError(destinationInput, document.querySelector('#destination-error'), false);
+    errorSummary.hidden = true;
+    successMessage.hidden = true;
+    window.rideLinkRouteDraft = {
+      ...draft,
+      waypoints: Array.isArray(draft.waypoints) ? [...draft.waypoints] : []
+    };
+  };
+
+  window.RideLinkTourForm = Object.freeze({ loadDraft });
+  window.addEventListener('ride-link:edit-tour', (event) => {
+    loadDraft(event.detail);
+  });
+
   backButton.addEventListener('click', () => {
     window.location.hash = '';
   });
@@ -206,7 +246,7 @@
 
   aiCard.addEventListener('click', showAiNotice);
 
-  addWaypointButton.addEventListener('click', createWaypoint);
+  addWaypointButton.addEventListener('click', () => createWaypoint());
 
   waypointList.addEventListener('click', (event) => {
     const button = event.target.closest('button[data-action]');
