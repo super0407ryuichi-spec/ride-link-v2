@@ -7,7 +7,7 @@
   <meta name="description" content="自由に走ろう、つながる道。Ride Link">
   <title>Ride Link</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-  <link rel="stylesheet" href="assets/css/styles.css?v=phase6-tour-confirm">
+  <link rel="stylesheet" href="assets/css/styles.css?v=phase6-saved-list">
 </head>
 <body>
 <div class="app">
@@ -214,6 +214,35 @@
     </main>
   </section>
 
+  <section id="saved-view" class="saved-view" aria-labelledby="saved-list-title" hidden>
+    <header class="saved-header">
+      <button id="saved-back-button" class="saved-back-button" type="button" aria-label="ホームへ戻る">‹</button>
+      <a class="saved-logo" href="#" aria-label="Ride Link ホーム">
+        <b>Ride Link</b>
+        <small>自由に走ろう、つながる道。</small>
+      </a>
+      <span class="saved-header-count" aria-label="保存件数"><b id="saved-tour-count">0</b>件</span>
+    </header>
+
+    <main class="saved-main">
+      <div class="saved-page-title">
+        <span>MY TOURING</span>
+        <h1 id="saved-list-title">保存したツーリング</h1>
+        <p>過去に作成したルートを開いて、編集や共有ができます</p>
+      </div>
+
+      <section id="saved-empty-state" class="saved-empty-state" hidden>
+        <span class="saved-empty-icon" aria-hidden="true">▤</span>
+        <strong>保存したツーリングはありません</strong>
+        <p>ツーリングを作成して、この端末に保存してください。</p>
+        <a href="#create">ツーリングを作成</a>
+      </section>
+
+      <div id="saved-tour-list" class="saved-tour-list" aria-live="polite"></div>
+      <div id="saved-action-status" class="saved-action-status" role="status" aria-live="polite" hidden></div>
+    </main>
+  </section>
+
   <nav class="bottom-nav" aria-label="メインナビゲーション">
     <a id="home-nav-link" class="active" href="#" data-view-link="home" aria-current="page"><span class="home-icon"></span><small>ホーム</small></a>
     <a id="create-nav-link" href="#create" data-view-link="create"><span class="nav-route"></span><small>ツーリング作成</small></a>
@@ -224,9 +253,10 @@
 <script src="https://unpkg.com/@tomickigrzegorz/leaflet-rotate@0.2.3/dist/leaflet-rotate.umd.min.js"></script>
 <script src="assets/js/jma-rain-provider.js?v=phase4-heading-up" defer></script>
 <script src="assets/js/app.js?v=phase4-heading-up" defer></script>
-<script src="assets/js/tour-storage.js?v=phase6-tour-confirm" defer></script>
+<script src="assets/js/tour-storage.js?v=phase6-saved-list" defer></script>
 <script src="assets/js/tour-links.js?v=phase6-tour-confirm" defer></script>
-<script src="assets/js/tour-form.js?v=phase6-tour-confirm" defer></script>
-<script src="assets/js/tour-confirm.js?v=phase6-tour-confirm" defer></script>
+<script src="assets/js/tour-form.js?v=phase6-saved-list" defer></script>
+<script src="assets/js/tour-confirm.js?v=phase6-saved-list" defer></script>
+<script src="assets/js/tour-list.js?v=phase6-saved-list" defer></script>
 </body>
 </html>
