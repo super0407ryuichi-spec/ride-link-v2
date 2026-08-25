@@ -7,7 +7,7 @@
   <meta name="description" content="自由に走ろう、つながる道。Ride Link">
   <title>Ride Link</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-  <link rel="stylesheet" href="assets/css/styles.css?v=phase6-saved-list">
+  <link rel="stylesheet" href="assets/css/styles.css?v=phase7-map-segments">
 </head>
 <body>
 <div class="app">
@@ -192,7 +192,7 @@
 
         <p id="maps-limit-note" class="maps-limit-note" role="status" hidden></p>
 
-        <div class="confirm-actions">
+        <div id="single-map-actions" class="confirm-actions">
           <a id="open-google-maps" class="confirm-action google-maps-action" href="#" target="_blank" rel="noopener">
             <span class="maps-action-icon" aria-hidden="true">G</span>
             <strong>Googleマップで開く</strong>
@@ -202,6 +202,15 @@
             <span class="copy-action-icon" aria-hidden="true">↗</span>
             <strong>共有リンクをコピー</strong>
           </button>
+        </div>
+
+        <section id="multi-map-actions" class="multi-map-actions" aria-labelledby="segment-count-message" hidden>
+          <p id="segment-count-message" class="segment-count-message"></p>
+          <div id="confirm-segment-list" class="confirm-segment-list"></div>
+          <button id="copy-all-segments" class="copy-all-segments" type="button">すべてのリンクをまとめてコピー</button>
+        </section>
+
+        <div class="confirm-actions confirm-save-actions">
           <button id="save-tour-button" class="confirm-action save-action" type="button">
             <span class="save-action-icon" aria-hidden="true">▤</span>
             <strong>このツーリングを保存</strong>
@@ -254,9 +263,9 @@
 <script src="assets/js/jma-rain-provider.js?v=phase4-heading-up" defer></script>
 <script src="assets/js/app.js?v=phase4-heading-up" defer></script>
 <script src="assets/js/tour-storage.js?v=phase6-saved-list" defer></script>
-<script src="assets/js/tour-links.js?v=phase6-tour-confirm" defer></script>
+<script src="assets/js/tour-links.js?v=phase7-map-segments" defer></script>
 <script src="assets/js/tour-form.js?v=phase6-saved-list" defer></script>
-<script src="assets/js/tour-confirm.js?v=phase6-saved-list" defer></script>
-<script src="assets/js/tour-list.js?v=phase6-saved-list" defer></script>
+<script src="assets/js/tour-confirm.js?v=phase7-map-segments" defer></script>
+<script src="assets/js/tour-list.js?v=phase7-map-segments" defer></script>
 </body>
 </html>
