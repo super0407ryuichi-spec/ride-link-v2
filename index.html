@@ -7,10 +7,11 @@
   <meta name="description" content="自由に走ろう、つながる道。Ride Link">
   <title>Ride Link</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-  <link rel="stylesheet" href="assets/css/styles.css?v=phase4-analysis-label-fix">
+  <link rel="stylesheet" href="assets/css/styles.css?v=phase5-tour-form">
 </head>
 <body>
 <div class="app">
+  <div id="home-view" class="view">
   <header class="header">
     <button class="header-btn hamburger" type="button" aria-label="メニュー"><i></i><i></i><i></i></button>
     <a class="logo" href="#"><span class="mountain">⌁</span><b>Ride Link</b><small>自由に走ろう、つながる道。</small></a>
@@ -49,15 +50,115 @@
       <a class="saved-cta" id="saved" href="#saved-list"><span class="saved-icon">▤</span><span><strong>保存したツーリング</strong><small>作成済みのプランを確認</small></span><b>›</b></a>
     </section>
   </main>
+  </div>
+
+  <section id="create-view" class="create-view" aria-labelledby="create-title" hidden>
+    <header class="create-header">
+      <button id="create-back-button" class="create-back-button" type="button" aria-label="ホームへ戻る">‹</button>
+      <a class="create-logo" href="#" aria-label="Ride Link ホーム">
+        <b>Ride Link</b>
+        <small>自由に走ろう、つながる道。</small>
+      </a>
+      <span class="create-header-spacer" aria-hidden="true"></span>
+    </header>
+
+    <main class="create-main">
+      <div class="create-page-title">
+        <span>ROUTE PLANNER</span>
+        <h1 id="create-title">ツーリングを作成</h1>
+        <p>ルートの地点を順番に入力してください</p>
+      </div>
+
+      <div class="route-methods" aria-label="ルート作成方法">
+        <button id="manual-route-card" class="route-method active" type="button" aria-pressed="true">
+          <span class="method-icon manual-icon" aria-hidden="true"></span>
+          <strong>自分でルートを作る</strong>
+          <small>経由地を追加してオリジナルルートを作成します</small>
+        </button>
+        <button id="ai-route-card" class="route-method ai-method" type="button" aria-pressed="false">
+          <span class="method-badge">準備中</span>
+          <span class="method-icon ai-icon" aria-hidden="true">✦</span>
+          <strong>AIに相談する<em>外部AI</em></strong>
+          <small>条件を入力してChatGPTなど外部AIに相談します</small>
+        </button>
+      </div>
+
+      <form id="tour-form" class="tour-form" novalidate>
+        <section class="form-card" aria-labelledby="tour-title-label">
+          <label class="form-field" for="tour-title">
+            <span class="field-label" id="tour-title-label">ツーリング名 <em class="optional-label">任意</em></span>
+            <input id="tour-title" name="title" type="text" maxlength="80" placeholder="例：赤城・吹割の滝ツーリング" autocomplete="off">
+          </label>
+        </section>
+
+        <section class="form-card route-form-card" aria-label="ルート入力">
+          <div class="route-point route-origin">
+            <span class="route-dot origin-dot" aria-hidden="true">出</span>
+            <label class="form-field" for="tour-origin">
+              <span class="field-label">出発地点 <em class="required-label">必須</em></span>
+              <input id="tour-origin" name="origin" type="text" placeholder="例：太田市役所" autocomplete="street-address" aria-describedby="origin-error" required>
+              <span id="origin-error" class="field-error" hidden>出発地点を入力してください</span>
+            </label>
+          </div>
+
+          <div class="route-line" aria-hidden="true"></div>
+
+          <div class="waypoint-section">
+            <div id="waypoint-list" class="waypoint-list" aria-live="polite"></div>
+            <button id="add-waypoint-button" class="add-waypoint-button" type="button">＋ 経由地点を追加</button>
+          </div>
+
+          <div class="route-line" aria-hidden="true"></div>
+
+          <div class="route-point route-destination">
+            <span class="route-dot destination-dot" aria-hidden="true">着</span>
+            <label class="form-field" for="tour-destination">
+              <span class="field-label">目的地 <em class="required-label">必須</em></span>
+              <input id="tour-destination" name="destination" type="text" placeholder="例：吹割の滝" autocomplete="off" aria-describedby="destination-error" required>
+              <span id="destination-error" class="field-error" hidden>目的地を入力してください</span>
+            </label>
+          </div>
+
+          <div class="route-line" aria-hidden="true"></div>
+
+          <div class="route-point route-return">
+            <span class="route-dot return-dot" aria-hidden="true">帰</span>
+            <div class="form-field">
+              <label class="field-label" for="tour-return">帰着地点 <em class="optional-label">任意</em></label>
+              <input id="tour-return" name="returnPoint" type="text" placeholder="例：太田市役所" autocomplete="off">
+              <label class="same-origin-option" for="return-same-origin">
+                <input id="return-same-origin" type="checkbox">
+                <span aria-hidden="true"></span>
+                <b>出発地点と同じにする</b>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <div id="form-error-summary" class="form-message error-message" role="alert" hidden></div>
+        <div id="form-success-message" class="form-message success-message" role="status" aria-live="polite" hidden></div>
+
+        <button class="route-confirm-button" type="submit">
+          <span>ルートを確認する</span>
+          <b aria-hidden="true">›</b>
+        </button>
+      </form>
+    </main>
+
+    <div id="ai-notice" class="ai-notice" role="status" aria-live="polite" hidden>
+      AI相談機能は今後実装します
+    </div>
+  </section>
   <nav class="bottom-nav" aria-label="メインナビゲーション">
-    <a class="active" href="#" aria-current="page"><span class="home-icon"></span><small>ホーム</small></a>
-    <a href="#create"><span class="nav-route"></span><small>ツーリング作成</small></a>
-    <a href="#saved"><span class="nav-list">☷</span><small>保存リスト</small></a>
+    <a id="home-nav-link" class="active" href="#" data-view-link="home" aria-current="page"><span class="home-icon"></span><small>ホーム</small></a>
+    <a id="create-nav-link" href="#create" data-view-link="create"><span class="nav-route"></span><small>ツーリング作成</small></a>
+    <a id="saved-nav-link" href="#saved" data-view-link="saved"><span class="nav-list">☷</span><small>保存リスト</small></a>
   </nav>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://unpkg.com/@tomickigrzegorz/leaflet-rotate@0.2.3/dist/leaflet-rotate.umd.min.js"></script>
 <script src="assets/js/jma-rain-provider.js?v=phase4-heading-up" defer></script>
 <script src="assets/js/app.js?v=phase4-heading-up" defer></script>
+<script src="assets/js/tour-form.js?v=phase5-tour-form" defer></script>
 </body>
 </html>
