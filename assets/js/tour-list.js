@@ -36,31 +36,24 @@
     return Number.isNaN(date.getTime()) ? '日付不明' : dateFormatter.format(date);
   };
 
-  const cloneTour = (tour) => ({
-    ...tour,
-    waypoints: [...tour.waypoints]
-  });
+  const cloneTour = (tour) => ({ ...tour, waypoints: [...tour.waypoints] });
 
   const createRouteSummary = (tour) => {
     const route = document.createElement('div');
     route.className = 'saved-route-summary';
-
     const origin = document.createElement('div');
     origin.innerHTML = '<span class="saved-route-dot origin"></span><small>出発地点</small>';
     const originValue = document.createElement('strong');
     originValue.textContent = tour.origin;
     origin.append(originValue);
-
     const connector = document.createElement('span');
     connector.className = 'saved-route-connector';
     connector.setAttribute('aria-hidden', 'true');
-
     const destination = document.createElement('div');
     destination.innerHTML = '<span class="saved-route-dot destination"></span><small>目的地</small>';
     const destinationValue = document.createElement('strong');
     destinationValue.textContent = tour.destination;
     destination.append(destinationValue);
-
     route.append(origin, connector, destination);
     return route;
   };
@@ -74,11 +67,35 @@
     return button;
   };
 
+  const createMapsActions = (tour, segments) => {
+    const container = document.createElement('div');
+    container.className = segments.length > 1 ? 'saved-segment-links' : '';
+
+    if (segments.length > 1) {
+      const note = document.createElement('p');
+      note.className = 'saved-segment-note';
+      note.textContent = `Googleマップ ${segments.length}区間`;
+      container.append(note);
+    }
+
+    segments.forEach((segment) => {
+      const mapsLink = document.createElement('a');
+      mapsLink.className = 'saved-card-action saved-maps-action';
+      mapsLink.href = segment.url;
+      mapsLink.target = '_blank';
+      mapsLink.rel = 'noopener';
+      mapsLink.textContent = segments.length === 1
+        ? 'Googleマップで開く'
+        : `区間${segment.index}をGoogleマップで開く`;
+      container.append(mapsLink);
+    });
+    return container;
+  };
+
   const createTourCard = (tour) => {
     const card = document.createElement('article');
     card.className = 'saved-tour-card';
     card.dataset.tourId = tour.id;
-
     const header = document.createElement('div');
     header.className = 'saved-card-head';
     const title = document.createElement('h2');
@@ -99,35 +116,26 @@
       createActionButton('編集', 'edit', 'edit-action')
     );
 
-    const mapsData = window.RideLinkTourLinks.buildGoogleMapsUrl(tour);
-    const mapsLink = document.createElement('a');
-    mapsLink.className = 'saved-card-action saved-maps-action';
-    mapsLink.href = mapsData.url;
-    mapsLink.target = '_blank';
-    mapsLink.rel = 'noopener';
-    mapsLink.textContent = 'Googleマップで開く';
+    const segments = window.RideLinkTourLinks.buildGoogleMapsSegments(tour);
+    const mapsActions = createMapsActions(tour, segments);
 
     const secondaryActions = document.createElement('div');
     secondaryActions.className = 'saved-card-secondary-actions';
     secondaryActions.append(
-      createActionButton('共有リンクをコピー', 'copy', 'share-action'),
+      createActionButton(
+        segments.length === 1 ? '共有リンクをコピー' : 'すべてのリンクをコピー',
+        'copy',
+        'share-action'
+      ),
       createActionButton('削除', 'delete', 'delete-action')
     );
 
-    card.append(
-      header,
-      createRouteSummary(tour),
-      meta,
-      primaryActions,
-      mapsLink,
-      secondaryActions
-    );
+    card.append(header, createRouteSummary(tour), meta, primaryActions, mapsActions, secondaryActions);
     return card;
   };
 
   const renderSavedTours = () => {
     if (!isSavedView()) return;
-
     actionStatus.hidden = true;
     listElement.replaceChildren();
 
@@ -136,7 +144,6 @@
       toursById = new Map(tours.map((tour) => [tour.id, tour]));
       countElement.textContent = String(tours.length);
       emptyState.hidden = tours.length > 0;
-
       tours.forEach((tour) => {
         try {
           listElement.append(createTourCard(tour));
@@ -177,26 +184,26 @@
     return copied;
   };
 
+  const copyText = async (text) => {
+    if (window.isSecureContext && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+    } else if (!fallbackCopy(text)) {
+      throw new Error('copy-failed');
+    }
+  };
+
   const copyTourLink = async (tour) => {
+    let text = '';
     try {
-      const { url } = window.RideLinkTourLinks.buildGoogleMapsUrl(tour);
-      if (window.isSecureContext && navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(url);
-      } else if (!fallbackCopy(url)) {
-        throw new Error('copy-failed');
-      }
-      showStatus('コピーしました');
+      const segments = window.RideLinkTourLinks.buildGoogleMapsSegments(tour);
+      text = segments.length === 1
+        ? segments[0].url
+        : window.RideLinkTourLinks.buildGoogleMapsShareText(tour, segments);
+      await copyText(text);
+      showStatus(segments.length === 1 ? 'コピーしました' : 'すべてのリンクをコピーしました');
     } catch {
-      try {
-        const { url } = window.RideLinkTourLinks.buildGoogleMapsUrl(tour);
-        if (fallbackCopy(url)) {
-          showStatus('コピーしました');
-          return;
-        }
-      } catch {
-        // Continue to the error message below.
-      }
-      showStatus('共有リンクをコピーできませんでした', 'error');
+      if (text && fallbackCopy(text)) showStatus('コピーしました');
+      else showStatus('共有リンクをコピーできませんでした', 'error');
     }
   };
 
@@ -216,12 +223,9 @@
     const title = tour.title || '名称未設定';
     const confirmed = window.confirm(`「${title}」を削除しますか？\nこの操作は取り消せません。`);
     if (!confirmed) return;
-
     try {
       window.RideLinkTourStorage.remove(tour.id);
-      if (window.rideLinkRouteDraft?.id === tour.id) {
-        window.rideLinkRouteDraft = null;
-      }
+      if (window.rideLinkRouteDraft?.id === tour.id) window.rideLinkRouteDraft = null;
       renderSavedTours();
       showStatus('削除しました');
     } catch {
@@ -238,7 +242,6 @@
       showStatus('ツーリングを読み込めませんでした', 'error');
       return;
     }
-
     const action = actionButton.dataset.action;
     if (action === 'open') openTour(tour);
     else if (action === 'edit') editTour(tour);
@@ -251,6 +254,5 @@
   });
   window.addEventListener('hashchange', renderSavedTours);
   window.addEventListener('storage', renderSavedTours);
-
   renderSavedTours();
 })();
