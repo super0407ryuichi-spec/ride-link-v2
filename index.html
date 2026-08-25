@@ -7,7 +7,7 @@
   <meta name="description" content="自由に走ろう、つながる道。Ride Link">
   <title>Ride Link</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-  <link rel="stylesheet" href="assets/css/styles.css?v=phase7-map-segments">
+  <link rel="stylesheet" href="assets/css/styles.css?v=phase8-ai-consult">
 </head>
 <body>
 <div class="app">
@@ -76,7 +76,7 @@
           <small>経由地を追加してオリジナルルートを作成します</small>
         </button>
         <button id="ai-route-card" class="route-method ai-method" type="button" aria-pressed="false">
-          <span class="method-badge">準備中</span>
+          <span class="method-badge">API不要</span>
           <span class="method-icon ai-icon" aria-hidden="true">✦</span>
           <strong>AIに相談する<em>外部AI</em></strong>
           <small>条件を入力してChatGPTなど外部AIに相談します</small>
@@ -145,10 +145,110 @@
       </form>
     </main>
 
-    <div id="ai-notice" class="ai-notice" role="status" aria-live="polite" hidden>
-      AI相談機能は今後実装します
-    </div>
   </section>
+  <section id="ai-consult-view" class="ai-consult-view" aria-labelledby="ai-consult-title" hidden>
+    <header class="create-header ai-consult-header">
+      <button id="ai-consult-back-button" class="create-back-button" type="button" aria-label="ツーリング作成へ戻る">‹</button>
+      <a class="create-logo" href="#" aria-label="Ride Link ホーム">
+        <b>Ride Link</b>
+        <small>自由に走ろう、つながる道。</small>
+      </a>
+      <span class="create-header-spacer" aria-hidden="true"></span>
+    </header>
+
+    <main class="create-main ai-consult-main">
+      <div class="create-page-title">
+        <span>AI ROUTE CONSULT</span>
+        <h1 id="ai-consult-title">AIに相談する</h1>
+        <p>条件から相談文を作り、外部AIの回答をルートへ反映します</p>
+      </div>
+
+      <div class="ai-flow-guide" aria-label="AI相談の流れ">
+        <span><b>1</b>条件入力</span><i aria-hidden="true">›</i>
+        <span><b>2</b>外部AIへ貼付</span><i aria-hidden="true">›</i>
+        <span><b>3</b>回答を反映</span>
+      </div>
+
+      <form id="ai-consult-form" class="ai-consult-form" novalidate>
+        <section class="ai-form-card" aria-labelledby="ai-conditions-title">
+          <div class="ai-card-heading">
+            <span aria-hidden="true">✦</span>
+            <div><small>CONDITIONS</small><h2 id="ai-conditions-title">相談条件</h2></div>
+          </div>
+
+          <label class="ai-field" for="ai-origin">
+            <span>出発地点 <em>必須</em></span>
+            <input id="ai-origin" type="text" placeholder="例：太田市役所" autocomplete="street-address" aria-describedby="ai-origin-error">
+            <small id="ai-origin-error" class="field-error" hidden>出発地点を入力してください</small>
+          </label>
+
+          <label class="ai-field" for="ai-area">
+            <span>希望エリア <small>任意</small></span>
+            <input id="ai-area" type="text" placeholder="例：群馬県北部、赤城山周辺" autocomplete="off">
+          </label>
+
+          <label class="ai-field" for="ai-distance">
+            <span>だいたいの走行距離 <small>任意</small></span>
+            <input id="ai-distance" type="text" inputmode="numeric" placeholder="例：200km程度" autocomplete="off">
+          </label>
+
+          <fieldset class="ai-choice-field">
+            <legend>高速道路</legend>
+            <div class="highway-options">
+              <label><input type="radio" name="highway" value="使う"><span>使う</span></label>
+              <label><input type="radio" name="highway" value="使わない"><span>使わない</span></label>
+              <label><input type="radio" name="highway" value="どちらでもよい" checked><span>どちらでもよい</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="ai-choice-field">
+            <legend>希望する内容 <small>複数選択可</small></legend>
+            <div class="preference-options">
+              <label><input type="checkbox" name="preference" value="絶景"><span>絶景</span></label>
+              <label><input type="checkbox" name="preference" value="峠"><span>峠</span></label>
+              <label><input type="checkbox" name="preference" value="ワインディング"><span>ワインディング</span></label>
+              <label><input type="checkbox" name="preference" value="海沿い"><span>海沿い</span></label>
+              <label><input type="checkbox" name="preference" value="温泉"><span>温泉</span></label>
+              <label><input type="checkbox" name="preference" value="グルメ"><span>グルメ</span></label>
+              <label><input type="checkbox" name="preference" value="蕎麦"><span>蕎麦</span></label>
+              <label><input type="checkbox" name="preference" value="カフェ"><span>カフェ</span></label>
+              <label><input type="checkbox" name="preference" value="道の駅"><span>道の駅</span></label>
+              <label><input type="checkbox" name="preference" value="神社・寺"><span>神社・寺</span></label>
+            </div>
+          </fieldset>
+
+          <label class="ai-field" for="ai-notes">
+            <span>自由記述 <small>任意</small></span>
+            <textarea id="ai-notes" rows="4" placeholder="例：景色のよい休憩場所を多めにしたい"></textarea>
+          </label>
+        </section>
+
+        <section class="ai-form-card prompt-card" aria-labelledby="ai-prompt-title">
+          <div class="ai-card-heading">
+            <span aria-hidden="true">⌘</span>
+            <div><small>PROMPT</small><h2 id="ai-prompt-title">外部AIへの相談文</h2></div>
+          </div>
+          <p class="ai-card-description">コピーしてChatGPTなどの外部AIへ貼り付けてください。自動送信は行いません。</p>
+          <textarea id="ai-prompt-preview" class="prompt-preview" rows="12" readonly aria-label="生成した相談文"></textarea>
+          <button id="copy-ai-prompt" class="copy-ai-prompt" type="button">相談文をコピー</button>
+        </section>
+
+        <section class="ai-form-card answer-card" aria-labelledby="ai-answer-title">
+          <div class="ai-card-heading">
+            <span aria-hidden="true">↙</span>
+            <div><small>AI ANSWER</small><h2 id="ai-answer-title">AIの回答を貼り付け</h2></div>
+          </div>
+          <p class="ai-card-description">外部AIの回答をそのまま貼り付けます。「：」と「:」の両方を読み取れます。</p>
+          <textarea id="ai-answer" rows="12" placeholder="ツーリング名：&#10;出発地：&#10;経由地1：&#10;目的地：&#10;帰着地："></textarea>
+          <button id="apply-ai-route" class="apply-ai-route" type="button">ルートに反映する</button>
+          <p class="ai-disclaimer">AIの提案内容や施設情報は、出発前にGoogleマップ等で確認してください</p>
+        </section>
+      </form>
+
+      <div id="ai-consult-status" class="ai-consult-status" role="status" aria-live="polite" hidden></div>
+    </main>
+  </section>
+
   <section id="confirm-view" class="confirm-view" aria-labelledby="confirm-title" hidden>
     <header class="confirm-header">
       <button id="confirm-back-button" class="confirm-back-button" type="button" aria-label="入力画面へ戻る">‹</button>
@@ -264,8 +364,9 @@
 <script src="assets/js/app.js?v=phase4-heading-up" defer></script>
 <script src="assets/js/tour-storage.js?v=phase6-saved-list" defer></script>
 <script src="assets/js/tour-links.js?v=phase7-map-segments" defer></script>
-<script src="assets/js/tour-form.js?v=phase6-saved-list" defer></script>
+<script src="assets/js/tour-form.js?v=phase8-ai-consult" defer></script>
 <script src="assets/js/tour-confirm.js?v=phase7-map-segments" defer></script>
+<script src="assets/js/ai-consult.js?v=phase8-ai-consult" defer></script>
 <script src="assets/js/tour-list.js?v=phase7-map-segments" defer></script>
 </body>
 </html>
