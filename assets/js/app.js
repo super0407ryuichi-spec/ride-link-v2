@@ -15,13 +15,22 @@
     return;
   }
 
+  const rotationAvailable = typeof L.Map?.prototype?.setBearing === 'function';
+
   const map = L.map(mapElement, {
     center: [36.2048, 138.2529],
     zoom: 5,
     zoomControl: true,
     touchZoom: true,
     dragging: true,
-    tap: false
+    tap: false,
+    rotate: rotationAvailable,
+    bearing: 0,
+    dragRotate: false,
+    shiftKeyRotate: false,
+    touchRotate: false,
+    rotateControl: false,
+    preventPageGestures: true
   });
 
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -44,11 +53,13 @@
   let currentMarker = null;
   let accuracyCircle = null;
   let latestHeading = null;
+  let headingUp = false;
 
   const applyHeading = () => {
     const markerElement = currentMarker?.getElement();
     if (!markerElement || latestHeading === null) return;
-    markerElement.style.setProperty('--heading', `${latestHeading}deg`);
+    const arrowHeading = headingUp ? 0 : latestHeading;
+    markerElement.style.setProperty('--heading', `${arrowHeading}deg`);
     markerElement.classList.add('has-heading');
   };
 
@@ -117,6 +128,17 @@
     let orientationListening = false;
     let orientationReceived = false;
     let orientationTimeout = null;
+    const compassIcon = headingButton.querySelector('.compass-icon');
+    const modeLabel = headingButton.querySelector('small');
+
+    const updateHeadingModeUI = () => {
+      headingButton.classList.toggle('is-active', headingUp);
+      headingButton.classList.toggle('is-heading-up', headingUp);
+      headingButton.setAttribute('aria-pressed', headingUp ? 'true' : 'false');
+      headingButton.setAttribute('aria-label', headingUp ? 'ノースアップへ切り替え' : 'ヘディングアップへ切り替え');
+      if (compassIcon) compassIcon.textContent = headingUp ? '↑' : 'N';
+      if (modeLabel) modeLabel.textContent = headingUp ? '進行方向' : '北固定';
+    };
 
     const screenAngle = () => {
       const angle = window.screen?.orientation?.angle;
@@ -132,12 +154,18 @@
         heading = 360 - event.alpha + screenAngle();
       }
       if (heading === null) return;
+
       latestHeading = (heading + 360) % 360;
       orientationReceived = true;
       window.clearTimeout(orientationTimeout);
       applyHeading();
-      headingButton.classList.add('is-active');
-      headingStatus.textContent = `進行方向を表示中（${Math.round(latestHeading)}°）`;
+
+      if (headingUp) {
+        map.setHeading(latestHeading, { ease: 0.18, deadzone: 1 });
+        headingStatus.textContent = `ヘディングアップ（${Math.round(latestHeading)}°）`;
+      } else {
+        headingStatus.textContent = `ノースアップ（進行方向 ${Math.round(latestHeading)}°）`;
+      }
     };
 
     const startOrientation = () => {
@@ -155,28 +183,60 @@
       }, 5000);
     };
 
-    headingButton.addEventListener('click', async () => {
+    const enableHeadingUp = async () => {
       if (!window.isSecureContext) {
         headingStatus.textContent = '進行方向の利用にはHTTPS接続が必要です';
+        return;
+      }
+      if (!rotationAvailable || typeof map.setHeading !== 'function') {
+        headingStatus.textContent = '地図の回転機能を読み込めませんでした。再読み込みしてください';
         return;
       }
       if (typeof window.DeviceOrientationEvent === 'undefined') {
         headingStatus.textContent = 'この端末では進行方向を取得できません';
         return;
       }
+
       try {
         if (typeof DeviceOrientationEvent.requestPermission === 'function') {
           const permission = await DeviceOrientationEvent.requestPermission();
           if (permission !== 'granted') {
-            headingStatus.textContent = 'センサーを許可すると進行方向を表示できます';
+            headingStatus.textContent = 'センサーを許可するとヘディングアップを利用できます';
             return;
           }
         }
+
+        headingUp = true;
+        updateHeadingModeUI();
         startOrientation();
+        if (latestHeading !== null) {
+          map.setHeading(latestHeading, { ease: 0.18, deadzone: 1 });
+          applyHeading();
+        }
       } catch {
-        headingStatus.textContent = 'センサーを許可すると進行方向を表示できます';
+        headingStatus.textContent = 'センサーを許可するとヘディングアップを利用できます';
       }
+    };
+
+    const disableHeadingUp = () => {
+      headingUp = false;
+      window.clearTimeout(orientationTimeout);
+      if (typeof map.stopHeadingUp === 'function') map.stopHeadingUp();
+      if (typeof map.setBearing === 'function') map.setBearing(0);
+      applyHeading();
+      updateHeadingModeUI();
+      headingStatus.textContent = latestHeading === null
+        ? 'ノースアップ（北を上に表示）'
+        : `ノースアップ（進行方向 ${Math.round(latestHeading)}°）`;
+    };
+
+    headingButton.addEventListener('click', () => {
+      if (headingUp) disableHeadingUp();
+      else enableHeadingUp();
     });
+
+    updateHeadingModeUI();
+    headingStatus.textContent = 'ノースアップ（北を上に表示）';
   }
 
   if (!timeline || !analysisTime || !rainStatus || !playButton || typeof window.JmaRainProvider === 'undefined') {
