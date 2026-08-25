@@ -7,7 +7,7 @@
   <meta name="description" content="自由に走ろう、つながる道。Ride Link">
   <title>Ride Link</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-  <link rel="stylesheet" href="assets/css/styles.css?v=phase2-location-fix">
+  <link rel="stylesheet" href="assets/css/styles.css?v=phase3-heading">
 </head>
 <body>
 <div class="app">
@@ -26,12 +26,12 @@
         <div id="leaflet-map"></div>
         <div class="map-actions" aria-label="地図操作">
           <button id="locate-button" type="button" aria-label="現在地へ戻る"><span class="target-icon"></span><small>現在地</small></button>
-          <button type="button" aria-label="進行方向を表示（未実装）"><span class="compass-icon">N</span><small>進行方向</small></button>
+          <button id="heading-button" type="button" aria-label="進行方向を表示"><span class="compass-icon">N</span><small>進行方向</small></button>
         </div>
       </div>
       <div class="location">
         <span class="pin"></span>
-        <p><small>現在地</small><strong id="location-status" role="status" aria-live="polite">位置情報を確認しています…</strong></p>
+        <p><small>現在地・進行方向</small><strong id="location-status" role="status" aria-live="polite">位置情報を確認しています…</strong><span id="heading-status" class="heading-status" role="status" aria-live="polite">進行方向ボタンで方位を表示できます</span></p>
       </div>
       <div class="timeline-box">
         <div class="clock"><span>現在時刻</span><strong id="current-time">--:--</strong></div>
@@ -53,6 +53,6 @@
   </nav>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="assets/js/app.js" defer></script>
+<script src="assets/js/app.js?v=phase3-heading" defer></script>
 </body>
 </html>
