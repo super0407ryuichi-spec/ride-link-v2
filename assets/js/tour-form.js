@@ -1,6 +1,7 @@
 (() => {
   const homeView = document.querySelector('#home-view');
   const createView = document.querySelector('#create-view');
+  const confirmView = document.querySelector('#confirm-view');
   const backButton = document.querySelector('#create-back-button');
   const manualCard = document.querySelector('#manual-route-card');
   const aiCard = document.querySelector('#ai-route-card');
@@ -23,11 +24,15 @@
   let aiNoticeTimer = null;
   let savedReturnPoint = '';
 
-  const currentView = () => window.location.hash === '#create' ? 'create' : 'home';
+  const currentView = () => {
+    if (window.location.hash === '#create') return 'create';
+    if (window.location.hash === '#confirm') return 'confirm';
+    return 'home';
+  };
 
   const updateNavigation = () => {
     const hash = window.location.hash;
-    const activeView = hash === '#create'
+    const activeView = hash === '#create' || hash === '#confirm'
       ? 'create'
       : hash === '#saved' || hash === '#saved-list'
         ? 'saved'
@@ -42,14 +47,19 @@
   };
 
   const renderView = () => {
-    const showCreate = currentView() === 'create';
-    homeView.hidden = showCreate;
+    const view = currentView();
+    const showHome = view === 'home';
+    const showCreate = view === 'create';
+    const showConfirm = view === 'confirm';
+
+    homeView.hidden = !showHome;
     createView.hidden = !showCreate;
-    document.body.classList.toggle('create-screen-open', showCreate);
+    if (confirmView) confirmView.hidden = !showConfirm;
+    document.body.classList.toggle('create-screen-open', !showHome);
     updateNavigation();
     window.scrollTo({ top: 0, behavior: 'auto' });
 
-    if (!showCreate) {
+    if (showHome) {
       window.setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
     }
   };
@@ -140,17 +150,24 @@
     errorElement.hidden = !hasError;
   };
 
-  const buildRouteData = () => ({
-    title: titleInput.value.trim(),
-    origin: originInput.value.trim(),
-    waypoints: [...waypointList.querySelectorAll('input')]
-      .map((input) => input.value.trim())
-      .filter(Boolean),
-    destination: destinationInput.value.trim(),
-    returnPoint: returnSameOrigin.checked
-      ? originInput.value.trim()
-      : returnInput.value.trim()
-  });
+  const buildRouteData = () => {
+    const previousDraft = window.rideLinkRouteDraft;
+    const routeData = {
+      title: titleInput.value.trim(),
+      origin: originInput.value.trim(),
+      waypoints: [...waypointList.querySelectorAll('input')]
+        .map((input) => input.value.trim())
+        .filter(Boolean),
+      destination: destinationInput.value.trim(),
+      returnPoint: returnSameOrigin.checked
+        ? originInput.value.trim()
+        : returnInput.value.trim()
+    };
+
+    if (previousDraft?.id) routeData.id = previousDraft.id;
+    if (previousDraft?.createdAt) routeData.createdAt = previousDraft.createdAt;
+    return routeData;
+  };
 
   const validateRoute = () => {
     const originError = document.querySelector('#origin-error');
@@ -218,8 +235,6 @@
 
   form.addEventListener('input', (event) => {
     successMessage.hidden = true;
-    window.rideLinkRouteDraft = null;
-
     if (event.target === originInput && originInput.value.trim()) {
       setFieldError(originInput, document.querySelector('#origin-error'), false);
     }
@@ -236,6 +251,7 @@
 
     window.rideLinkRouteDraft = routeData;
     window.dispatchEvent(new CustomEvent('ride-link:route-ready', { detail: routeData }));
+    window.location.hash = '#confirm';
     successMessage.textContent = '入力内容を確認しました。次の確認画面へ渡す準備ができています';
     successMessage.hidden = false;
     successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
