@@ -1,10 +1,22 @@
 (() => {
-  const MOBILE_WAYPOINT_LIMIT = 3;
+  const MAX_WAYPOINTS_PER_SEGMENT = 3;
+  const MAX_POINTS_PER_SEGMENT = MAX_WAYPOINTS_PER_SEGMENT + 2;
   const URL_LENGTH_LIMIT = 2048;
 
   const cleanPoint = (value) => String(value || '').trim();
 
-  const buildGoogleMapsUrl = (route) => {
+  const buildSegmentUrl = ({ origin, destination, waypoints }) => {
+    const params = new URLSearchParams({
+      api: '1',
+      origin,
+      destination,
+      travelmode: 'driving'
+    });
+    if (waypoints.length) params.set('waypoints', waypoints.join('|'));
+    return `https://www.google.com/maps/dir/?${params.toString()}`;
+  };
+
+  const getRoutePoints = (route) => {
     const origin = cleanPoint(route?.origin);
     const destination = cleanPoint(route?.destination);
     const returnPoint = cleanPoint(route?.returnPoint);
@@ -13,62 +25,75 @@
       : [];
 
     if (!origin || !destination) throw new Error('invalid-route');
+    return [origin, ...waypoints, destination, ...(returnPoint ? [returnPoint] : [])];
+  };
 
-    const hasReturn = Boolean(returnPoint);
-    const finalDestination = hasReturn ? returnPoint : destination;
-    const requestedWaypoints = hasReturn
-      ? [...waypoints, destination]
-      : [...waypoints];
+  const buildGoogleMapsSegments = (route) => {
+    const points = getRoutePoints(route);
+    const segments = [];
+    let startIndex = 0;
 
-    let includedWaypoints;
-    if (requestedWaypoints.length <= MOBILE_WAYPOINT_LIMIT) {
-      includedWaypoints = [...requestedWaypoints];
-    } else if (hasReturn) {
-      includedWaypoints = [
-        ...waypoints.slice(0, MOBILE_WAYPOINT_LIMIT - 1),
-        destination
-      ];
-    } else {
-      includedWaypoints = waypoints.slice(0, MOBILE_WAYPOINT_LIMIT);
-    }
-
-    let omittedCount = requestedWaypoints.length - includedWaypoints.length;
-
-    const createUrl = () => {
-      const params = new URLSearchParams({
-        api: '1',
-        origin,
-        destination: finalDestination,
-        travelmode: 'driving'
+    while (startIndex < points.length - 1) {
+      let endIndex = Math.min(
+        startIndex + MAX_POINTS_PER_SEGMENT - 1,
+        points.length - 1
+      );
+      let segmentPoints = points.slice(startIndex, endIndex + 1);
+      let segmentUrl = buildSegmentUrl({
+        origin: segmentPoints[0],
+        destination: segmentPoints.at(-1),
+        waypoints: segmentPoints.slice(1, -1)
       });
-      if (includedWaypoints.length) {
-        params.set('waypoints', includedWaypoints.join('|'));
+
+      while (segmentUrl.length > URL_LENGTH_LIMIT && segmentPoints.length > 2) {
+        endIndex -= 1;
+        segmentPoints = points.slice(startIndex, endIndex + 1);
+        segmentUrl = buildSegmentUrl({
+          origin: segmentPoints[0],
+          destination: segmentPoints.at(-1),
+          waypoints: segmentPoints.slice(1, -1)
+        });
       }
-      return `https://www.google.com/maps/dir/?${params.toString()}`;
-    };
 
-    let url = createUrl();
-    const protectedWaypointCount = hasReturn ? 1 : 0;
-
-    while (url.length > URL_LENGTH_LIMIT && includedWaypoints.length > protectedWaypointCount) {
-      const removeIndex = hasReturn
-        ? includedWaypoints.length - 2
-        : includedWaypoints.length - 1;
-      includedWaypoints.splice(Math.max(removeIndex, 0), 1);
-      omittedCount += 1;
-      url = createUrl();
+      segments.push({
+        index: segments.length + 1,
+        origin: segmentPoints[0],
+        destination: segmentPoints.at(-1),
+        waypoints: segmentPoints.slice(1, -1),
+        url: segmentUrl,
+        overLengthLimit: segmentUrl.length > URL_LENGTH_LIMIT
+      });
+      startIndex = endIndex;
     }
 
+    return segments;
+  };
+
+  const buildGoogleMapsShareText = (route, segments = buildGoogleMapsSegments(route)) => {
+    const title = cleanPoint(route?.title) || '名称未設定';
+    const links = segments
+      .map((segment) => `区間${segment.index}\n${segment.url}`)
+      .join('\n\n');
+    return `${title}\n\n${links}`;
+  };
+
+  const buildGoogleMapsUrl = (route) => {
+    const segments = buildGoogleMapsSegments(route);
     return {
-      url,
-      omittedCount,
-      includedWaypoints: [...includedWaypoints],
-      overLengthLimit: url.length > URL_LENGTH_LIMIT
+      ...segments[0],
+      segments,
+      segmentCount: segments.length,
+      omittedCount: 0,
+      includedWaypoints: [...segments[0].waypoints],
+      overLengthLimit: segments.some((segment) => segment.overLengthLimit)
     };
   };
 
   window.RideLinkTourLinks = Object.freeze({
+    buildGoogleMapsSegments,
+    buildGoogleMapsShareText,
     buildGoogleMapsUrl,
-    mobileWaypointLimit: MOBILE_WAYPOINT_LIMIT
+    maxWaypointsPerSegment: MAX_WAYPOINTS_PER_SEGMENT,
+    maxPointsPerSegment: MAX_POINTS_PER_SEGMENT
   });
 })();
