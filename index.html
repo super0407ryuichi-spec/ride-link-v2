@@ -323,25 +323,7 @@
           <p id="confirm-return-note" class="confirm-return-note"></p>
         </section>
 
-        <p id="maps-limit-note" class="maps-limit-note" role="status" hidden></p>
-
-        <div id="single-map-actions" class="confirm-actions">
-          <a id="open-google-maps" class="confirm-action google-maps-action" href="#" target="_blank" rel="noopener">
-            <span class="maps-action-icon" aria-hidden="true">G</span>
-            <strong>Googleマップで開く</strong>
-            <b aria-hidden="true">›</b>
-          </a>
-          <button id="copy-share-link" class="confirm-action copy-action" type="button">
-            <span class="copy-action-icon" aria-hidden="true">↗</span>
-            <strong>共有リンクをコピー</strong>
-          </button>
-        </div>
-
-        <section id="multi-map-actions" class="multi-map-actions" aria-labelledby="segment-count-message" hidden>
-          <p id="segment-count-message" class="segment-count-message"></p>
-          <div id="confirm-segment-list" class="confirm-segment-list"></div>
-          <button id="copy-all-segments" class="copy-all-segments" type="button">すべてのリンクをまとめてコピー</button>
-        </section>
+        <button id="copy-all-segments" class="copy-all-segments" type="button">すべてのリンクをまとめてコピー</button>
 
         <div class="confirm-actions confirm-save-actions">
           <button id="save-tour-button" class="confirm-action save-action" type="button">
@@ -349,6 +331,13 @@
             <strong>このツーリングを保存</strong>
           </button>
         </div>
+
+        <p id="maps-limit-note" class="maps-limit-note" role="status" hidden></p>
+
+        <section id="multi-map-actions" class="multi-map-actions" aria-labelledby="segment-count-message" hidden>
+          <p id="segment-count-message" class="segment-count-message"></p>
+          <div id="confirm-segment-list" class="confirm-segment-list"></div>
+        </section>
 
         <p class="share-help">コピーしたURLはLINEなどへ貼り付けて共有できます</p>
         <div id="confirm-action-status" class="confirm-action-status" role="status" aria-live="polite" hidden></div>
@@ -398,7 +387,7 @@
 <script src="assets/js/tour-storage.js?v=phase6-saved-list" defer></script>
 <script src="assets/js/tour-links.js?v=phase7-map-segments" defer></script>
 <script src="assets/js/tour-form.js?v=phase8-ai-consult" defer></script>
-<script src="assets/js/tour-confirm.js?v=phase7-map-segments" defer></script>
+<script src="assets/js/tour-confirm.js?v=phase7-actions-reorder" defer></script>
 <script src="assets/js/ai-consult.js?v=phase8-ai-consult" defer></script>
 <script src="assets/js/tour-list.js?v=phase7-map-segments" defer></script>
 </body>

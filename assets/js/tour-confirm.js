@@ -8,9 +8,6 @@
   const routeList = document.querySelector('#confirm-route-list');
   const returnNote = document.querySelector('#confirm-return-note');
   const mapsLimitNote = document.querySelector('#maps-limit-note');
-  const singleMapActions = document.querySelector('#single-map-actions');
-  const mapsButton = document.querySelector('#open-google-maps');
-  const copyButton = document.querySelector('#copy-share-link');
   const multiMapActions = document.querySelector('#multi-map-actions');
   const segmentCountMessage = document.querySelector('#segment-count-message');
   const segmentList = document.querySelector('#confirm-segment-list');
@@ -18,7 +15,7 @@
   const saveButton = document.querySelector('#save-tour-button');
   const actionStatus = document.querySelector('#confirm-action-status');
 
-  if (!confirmView || !routeList || !mapsButton || !copyButton || !saveButton || !segmentList) return;
+  if (!confirmView || !routeList || !copyAllButton || !saveButton || !segmentList) return;
 
   let currentDraft = null;
   let currentSegments = [];
@@ -116,12 +113,8 @@
     const overLength = currentSegments.some((segment) => segment.overLengthLimit);
 
     if (currentSegments.length === 1) {
-      singleMapActions.hidden = false;
       multiMapActions.hidden = true;
-      mapsButton.href = currentSegments[0].url;
-      mapsButton.removeAttribute('aria-disabled');
     } else {
-      singleMapActions.hidden = true;
       multiMapActions.hidden = false;
       segmentCountMessage.textContent =
         `このルートはGoogleマップの制限により${currentSegments.length}区間に分かれます`;
@@ -159,10 +152,7 @@
     } catch {
       currentDraft = draft;
       currentSegments = [];
-      singleMapActions.hidden = false;
       multiMapActions.hidden = true;
-      mapsButton.removeAttribute('href');
-      mapsButton.setAttribute('aria-disabled', 'true');
       mapsLimitNote.textContent = 'Googleマップ用URLを作成できませんでした';
       mapsLimitNote.hidden = false;
     }
@@ -239,7 +229,6 @@
   backButton.addEventListener('click', returnToEdit);
   editButton.addEventListener('click', returnToEdit);
   emptyState.querySelector('button').addEventListener('click', returnToEdit);
-  copyButton.addEventListener('click', () => copyText(currentSegments[0]?.url));
   copyAllButton.addEventListener('click', () => {
     if (!currentDraft || !currentSegments.length) return;
     const text = window.RideLinkTourLinks.buildGoogleMapsShareText(currentDraft, currentSegments);
