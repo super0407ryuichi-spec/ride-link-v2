@@ -27,7 +27,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lobster&display=swap">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-  <link rel="stylesheet" href="assets/css/styles.css?v=phase10-ai-location-home">
+  <link rel="stylesheet" href="assets/css/styles.css?v=phase10-car-navigation-home">
 </head>
 <body>
 <div class="app">
@@ -217,6 +217,16 @@
             <input id="ai-origin" type="text" placeholder="例：太田市役所" autocomplete="street-address" aria-describedby="ai-origin-error">
             <small id="ai-origin-error" class="field-error" hidden>出発地点を入力してください</small>
             <button id="ai-return-home" class="ai-return-home-button" type="button" aria-pressed="false">⌂ 自宅に帰る</button>
+            <button id="ai-change-home" class="ai-change-home-button" type="button" hidden>登録した自宅を変更</button>
+            <div id="ai-home-registration" class="ai-home-registration" hidden>
+              <label for="ai-home-address">自宅の住所・施設名</label>
+              <input id="ai-home-address" type="text" placeholder="例：群馬県太田市○○町1-2-3" autocomplete="street-address">
+              <small>自宅情報はこの端末のブラウザ内だけに保存されます</small>
+              <div>
+                <button id="ai-cancel-home" type="button">キャンセル</button>
+                <button id="ai-save-home" type="button">自宅を登録</button>
+              </div>
+            </div>
           </div>
 
           <label class="ai-field" for="ai-area">
@@ -392,7 +402,7 @@
 <script src="assets/js/tour-links.js?v=phase7-map-segments" defer></script>
 <script src="assets/js/tour-form.js?v=phase8-ai-consult" defer></script>
 <script src="assets/js/tour-confirm.js?v=phase7-actions-reorder" defer></script>
-<script src="assets/js/ai-consult.js?v=phase8-location-return-home" defer></script>
+<script src="assets/js/ai-consult.js?v=phase8-car-navigation-home" defer></script>
 <script src="assets/js/tour-list.js?v=phase7-map-segments" defer></script>
 </body>
 </html>

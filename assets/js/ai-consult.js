@@ -5,6 +5,11 @@
   const originInput = document.querySelector('#ai-origin');
   const locationButton = document.querySelector('#ai-use-current-location');
   const returnHomeButton = document.querySelector('#ai-return-home');
+  const changeHomeButton = document.querySelector('#ai-change-home');
+  const homeRegistration = document.querySelector('#ai-home-registration');
+  const homeAddressInput = document.querySelector('#ai-home-address');
+  const cancelHomeButton = document.querySelector('#ai-cancel-home');
+  const saveHomeButton = document.querySelector('#ai-save-home');
   const areaInput = document.querySelector('#ai-area');
   const distanceInput = document.querySelector('#ai-distance');
   const notesInput = document.querySelector('#ai-notes');
@@ -14,10 +19,18 @@
   const applyButton = document.querySelector('#apply-ai-route');
   const status = document.querySelector('#ai-consult-status');
 
-  if (!view || !form || !originInput || !locationButton || !returnHomeButton || !promptPreview || !answerInput) return;
+  if (!view || !form || !originInput || !locationButton || !returnHomeButton || !changeHomeButton || !homeRegistration || !homeAddressInput || !cancelHomeButton || !saveHomeButton || !promptPreview || !answerInput) return;
 
+  const HOME_STORAGE_KEY = 'ride-link-home-address-v1';
   let statusTimer = null;
   let returnHome = false;
+  let homeAddress = '';
+
+  try {
+    homeAddress = window.localStorage.getItem(HOME_STORAGE_KEY)?.trim() || '';
+  } catch {
+    homeAddress = '';
+  }
 
   const showStatus = (message, type = 'success', persistent = false) => {
     window.clearTimeout(statusTimer);
@@ -53,13 +66,13 @@
       `高速道路：${highway}`,
       `希望する内容：${preferences.length ? preferences.join('、') : '指定なし'}`,
       `自由記述：${notes || 'なし'}`,
-      `帰着地点：${returnHome ? '出発地点と同じ（自宅へ帰る）' : '提案に任せる'}`,
+      `帰着地点：${returnHome ? homeAddress : '提案に任せる'}`,
       '',
       '【必須条件】',
       '・バイクの日帰りツーリングルートとして考えてください。',
       '・各地点は実在する施設名、観光地名、店舗名など、Googleマップで検索できる具体的な場所名にしてください。',
       '・地点の順番を明確にしてください。',
-      ...(returnHome ? ['・帰着地は必ず出発地点と同じ場所にしてください。'] : []),
+      ...(returnHome ? [`・帰着地は必ず登録した自宅「${homeAddress}」にしてください。`] : []),
       '・余計な説明は最小限にしてください。',
       '・必ず次の固定形式だけで出力してください。',
       '',
@@ -106,14 +119,51 @@
     );
   };
 
-  const toggleReturnHome = () => {
-    returnHome = !returnHome;
+  const updateHomeControls = () => {
     returnHomeButton.setAttribute('aria-pressed', String(returnHome));
     returnHomeButton.classList.toggle('active', returnHome);
     returnHomeButton.textContent = returnHome ? '✓ 自宅に帰る' : '⌂ 自宅に帰る';
+    changeHomeButton.hidden = !homeAddress;
+  };
+
+  const openHomeRegistration = () => {
+    homeAddressInput.value = homeAddress;
+    homeRegistration.hidden = false;
+    homeAddressInput.focus();
+  };
+
+  const saveHome = () => {
+    const value = homeAddressInput.value.trim();
+    if (!value) {
+      showStatus('自宅の住所または施設名を入力してください', 'error', true);
+      homeAddressInput.focus();
+      return;
+    }
+    try {
+      window.localStorage.setItem(HOME_STORAGE_KEY, value);
+    } catch {
+      showStatus('自宅情報を保存できませんでした。ブラウザの設定を確認してください', 'error', true);
+      return;
+    }
+    homeAddress = value;
+    returnHome = true;
+    homeRegistration.hidden = true;
+    updateHomeControls();
+    updatePromptPreview();
+    showStatus('自宅を登録し、帰着地点に設定しました');
+  };
+
+  const toggleReturnHome = () => {
+    if (!homeAddress) {
+      openHomeRegistration();
+      showStatus('最初に自宅を登録してください', 'warning', true);
+      return;
+    }
+    returnHome = !returnHome;
+    updateHomeControls();
     updatePromptPreview();
     showStatus(returnHome
-      ? '帰着地点を出発地点と同じに設定しました'
+      ? `帰着地点を自宅「${homeAddress}」に設定しました`
       : '「自宅に帰る」を解除しました');
   };
 
@@ -273,8 +323,14 @@
   form.addEventListener('change', updatePromptPreview);
   locationButton.addEventListener('click', useCurrentLocation);
   returnHomeButton.addEventListener('click', toggleReturnHome);
+  changeHomeButton.addEventListener('click', openHomeRegistration);
+  cancelHomeButton.addEventListener('click', () => {
+    homeRegistration.hidden = true;
+  });
+  saveHomeButton.addEventListener('click', saveHome);
   copyPromptButton.addEventListener('click', copyPrompt);
   applyButton.addEventListener('click', applyAiRoute);
+  updateHomeControls();
   updatePromptPreview();
 
   window.RideLinkAiConsult = Object.freeze({ buildPrompt, parseAiAnswer });
