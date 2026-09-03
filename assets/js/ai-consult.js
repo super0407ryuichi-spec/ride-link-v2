@@ -3,6 +3,8 @@
   const backButton = document.querySelector('#ai-consult-back-button');
   const form = document.querySelector('#ai-consult-form');
   const originInput = document.querySelector('#ai-origin');
+  const locationButton = document.querySelector('#ai-use-current-location');
+  const returnHomeButton = document.querySelector('#ai-return-home');
   const areaInput = document.querySelector('#ai-area');
   const distanceInput = document.querySelector('#ai-distance');
   const notesInput = document.querySelector('#ai-notes');
@@ -12,9 +14,10 @@
   const applyButton = document.querySelector('#apply-ai-route');
   const status = document.querySelector('#ai-consult-status');
 
-  if (!view || !form || !originInput || !promptPreview || !answerInput) return;
+  if (!view || !form || !originInput || !locationButton || !returnHomeButton || !promptPreview || !answerInput) return;
 
   let statusTimer = null;
+  let returnHome = false;
 
   const showStatus = (message, type = 'success', persistent = false) => {
     window.clearTimeout(statusTimer);
@@ -50,11 +53,13 @@
       `高速道路：${highway}`,
       `希望する内容：${preferences.length ? preferences.join('、') : '指定なし'}`,
       `自由記述：${notes || 'なし'}`,
+      `帰着地点：${returnHome ? '出発地点と同じ（自宅へ帰る）' : '提案に任せる'}`,
       '',
       '【必須条件】',
       '・バイクの日帰りツーリングルートとして考えてください。',
       '・各地点は実在する施設名、観光地名、店舗名など、Googleマップで検索できる具体的な場所名にしてください。',
       '・地点の順番を明確にしてください。',
+      ...(returnHome ? ['・帰着地は必ず出発地点と同じ場所にしてください。'] : []),
       '・余計な説明は最小限にしてください。',
       '・必ず次の固定形式だけで出力してください。',
       '',
@@ -72,6 +77,44 @@
 
   const updatePromptPreview = () => {
     promptPreview.value = buildPrompt();
+  };
+
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      showStatus('この端末では現在位置を取得できません', 'error', true);
+      return;
+    }
+    locationButton.disabled = true;
+    locationButton.textContent = '取得中…';
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        originInput.value = `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
+        originInput.dispatchEvent(new Event('input', { bubbles: true }));
+        locationButton.disabled = false;
+        locationButton.textContent = '⌖ 現在位置を取得';
+        showStatus('現在位置を出発地点に設定しました');
+      },
+      (error) => {
+        locationButton.disabled = false;
+        locationButton.textContent = '⌖ 現在位置を取得';
+        const message = error.code === 1
+          ? '位置情報の利用を許可してください'
+          : '現在位置を取得できませんでした。もう一度お試しください';
+        showStatus(message, 'error', true);
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+    );
+  };
+
+  const toggleReturnHome = () => {
+    returnHome = !returnHome;
+    returnHomeButton.setAttribute('aria-pressed', String(returnHome));
+    returnHomeButton.classList.toggle('active', returnHome);
+    returnHomeButton.textContent = returnHome ? '✓ 自宅に帰る' : '⌂ 自宅に帰る';
+    updatePromptPreview();
+    showStatus(returnHome
+      ? '帰着地点を出発地点と同じに設定しました'
+      : '「自宅に帰る」を解除しました');
   };
 
   const fallbackCopy = (text) => {
@@ -228,6 +271,8 @@
     }
   });
   form.addEventListener('change', updatePromptPreview);
+  locationButton.addEventListener('click', useCurrentLocation);
+  returnHomeButton.addEventListener('click', toggleReturnHome);
   copyPromptButton.addEventListener('click', copyPrompt);
   applyButton.addEventListener('click', applyAiRoute);
   updatePromptPreview();
