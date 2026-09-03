@@ -49,6 +49,16 @@
     const stopValue = document.createElement('strong');
     stopValue.textContent = value;
     text.append(stopLabel, stopValue);
+    if (!empty && value) {
+      const placeLink = document.createElement('a');
+      placeLink.className = 'confirm-place-link';
+      placeLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(value)}`;
+      placeLink.target = '_blank';
+      placeLink.rel = 'noopener';
+      placeLink.textContent = 'Googleマップで見る ›';
+      placeLink.setAttribute('aria-label', `${value}をGoogleマップで見る`);
+      text.append(placeLink);
+    }
     item.append(node, text);
     return item;
   };
