@@ -379,7 +379,7 @@
     updateTimelineSelection();
     const label = kindLabels[frame.kind];
     rainStatus.textContent = `${label} ${timeFormatter.format(frame.date)} を表示中`;
-    timeline.children[index]?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    //timeline.children[index]?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
 
     if (preload && index + 1 < frames.length) {
       window.setTimeout(() => preloadNextFrame(index + 1), 100);
