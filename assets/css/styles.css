@@ -230,8 +230,8 @@ body #home-view .home-hero{height:calc(100svh - 76px - env(safe-area-inset-botto
 @media(prefers-reduced-motion:reduce){.home-hero-video,.home-hero .logo{animation:none;transform:none}.hero-motion-toggle,.hero-motion-control{display:none}}
 /* Adopted Alpine Blue photography and lightweight video. */
 :root{--alpine-create-hero-image:url("../images/alpine-create-hero.webp");--alpine-confirm-hero-image:url("../images/alpine-confirm-hero.webp");--alpine-saved-placeholder-image:url("../images/rides/ride-mountain-01.webp")}
-body #home-view .home-hero{background-image:url("../images/alpine-home-poster.webp");background-position:center 60%}
-.home-hero-video{animation:none;transform:none;object-position:center 60%;background-image:url("../images/alpine-home-poster.webp");background-position:center 60%;opacity:0;transition:opacity .6s ease}
+body #home-view .home-hero{background-image:url("../images/alpine-home-parallax-poster.jpg");background-position:center 60%}
+.home-hero-video{animation:none;transform:none;object-position:center 60%;background-image:url("../images/alpine-home-parallax-poster.jpg");background-position:center 60%;opacity:0;transition:opacity .6s ease}
 .home-hero-video.is-playing{opacity:1}
 body #home-view .home-hero::before{background:linear-gradient(180deg,rgba(7,30,49,.38),rgba(7,30,49,.03) 35%,rgba(7,30,49,.06) 56%,rgba(7,23,34,.76) 87%,rgba(7,23,34,.94))}
 .create-alpine-hero{animation:none;background-position:center 60%}

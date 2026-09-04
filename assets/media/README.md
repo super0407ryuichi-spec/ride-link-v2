@@ -32,3 +32,8 @@ Saved cards cycle mountain/coast/bridge as decorative photos only. They do not c
 Local Edge: home, create, AI consult, confirm and saved screens; route form -> confirmation -> save -> reload; widths 320/360/390/768/1280; no horizontal overflow in create view; no console or page errors in ordinary flow. Video decodes at 720 x 1280 / 8 s, loops, pauses/resumes, pauses after navigating away, resumes on return. Reduced motion makes zero media requests. Aborted video request retains poster.
 
 Safari/iPhone hardware is not available in this environment; actual Safari playback remains to be checked. No deployment or git commit performed.
+## Adopted local motion v2
+
+The user selected comparison option 02. Active home sources are now alpine-home-parallax-v2.mp4 / .webm, with assets/images/alpine-home-parallax-poster.jpg as the matching first-frame poster. 720 x 1280, 24fps, 8 seconds, silent. MP4 1,763,194 bytes; WebM 571,452 bytes.
+
+Made entirely by local image warping and FFmpeg encoding, without external video generation. Cloud-region horizontal drift fades out before the mountain silhouette; slight foreground displacement and camera scale create depth. Rider remains attached to the road; this does not synthesize independent riding motion. Previous photo-zoom assets are retained. Media controls remain hidden. Existing media lifecycle/fallback logic is unchanged.
